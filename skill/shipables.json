@@ -1,7 +1,19 @@
 {
   "version": "1.0.0",
-  "keywords": ["startup", "market-research", "voice-agent", "vapi", "tinyfish", "redis", "validation"],
-  "categories": ["agents", "market-research", "product"],
+  "keywords": [
+    "startup-validation",
+    "market-research",
+    "voice-agent",
+    "vapi",
+    "tinyfish",
+    "redis",
+    "shipables"
+  ],
+  "categories": [
+    "agents",
+    "market-research",
+    "product"
+  ],
   "author": {
     "name": "Alejandro",
     "github": "alejandrospot2"
@@ -9,50 +21,62 @@
   "config": {
     "env": [
       {
-        "name": "TINYFISH_API_KEY",
-        "description": "TinyFish API key for live web research (Search and Fetch APIs).",
+        "name": "APP_BASE_URL",
+        "description": "Public HTTPS base URL of the deployed RealityCheck Live app. Required for Vapi tool calls.",
         "required": true,
-        "secret": true
+        "secret": false
       },
       {
         "name": "VAPI_API_KEY",
-        "description": "Vapi API key for voice assistant setup and calls.",
-        "required": true,
+        "description": "Vapi API key for assistant setup and voice workflows.",
+        "required": false,
+        "secret": true
+      },
+      {
+        "name": "VAPI_ASSISTANT_ID",
+        "description": "Existing Vapi assistant ID, if the assistant is already created.",
+        "required": false,
+        "secret": false
+      },
+      {
+        "name": "TINYFISH_API_KEY",
+        "description": "TinyFish API key for live Search and Fetch evidence collection.",
+        "required": false,
         "secret": true
       },
       {
         "name": "REDIS_URL",
-        "description": "Redis connection URL for run state, evidence, and memory.",
-        "required": true,
+        "description": "Redis connection URL for run state, event timeline, evidence, cache, and final atlas.",
+        "required": false,
         "secret": true
       },
       {
         "name": "OPENAI_API_KEY",
-        "description": "OpenAI API key for LLM synthesis (use one of: OPENAI_API_KEY, GROQ_API_KEY, or KIMI_API_KEY).",
+        "description": "OpenAI API key for market atlas synthesis. Use one of OPENAI_API_KEY, GROQ_API_KEY, or KIMI_API_KEY.",
         "required": false,
         "secret": true
       },
       {
         "name": "GROQ_API_KEY",
-        "description": "Groq API key for free LLM synthesis via llama-3.1-8b-instant.",
+        "description": "Groq API key for fallback LLM synthesis.",
         "required": false,
         "secret": true
       },
       {
         "name": "KIMI_API_KEY",
-        "description": "Kimi (Moonshot AI) API key for LLM synthesis via moonshot-v1-8k.",
+        "description": "Kimi/Moonshot API key for fallback LLM synthesis.",
         "required": false,
         "secret": true
       },
       {
-        "name": "APP_BASE_URL",
-        "description": "Public HTTPS base URL of the deployed app. Required for Vapi custom tool endpoint.",
-        "required": true,
+        "name": "DEMO_MODE",
+        "description": "Set to true for fixture-backed runs without external services.",
+        "required": false,
         "secret": false
       },
       {
-        "name": "DEMO_MODE",
-        "description": "Set to 'true' to return fixture data without live API calls. Safe for demos.",
+        "name": "DEMO_SEEDED_RUN_ID",
+        "description": "Seeded demo run ID. Defaults to run_demo_001.",
         "required": false,
         "secret": false
       }

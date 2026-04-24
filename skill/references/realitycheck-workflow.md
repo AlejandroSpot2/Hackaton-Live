@@ -1,77 +1,102 @@
-# RealityCheck Live — Agent Workflow
+# RealityCheck Live Agent Workflow
 
 ## Overview
 
-RealityCheck Live turns a spoken startup pitch into a source-cited market thesis using a 5-lane research pipeline.
+RealityCheck Live turns a spoken startup pitch into a source-cited market thesis using a five-lane research pipeline.
 
-## 8-Step Agent Loop
+## Eight-Step Agent Loop
 
-### Step 1: Voice Intake (Vapi)
-- Founder calls or uses web call interface
-- Vapi assistant asks: idea, target user, current alternative, why now, biggest risk
-- Keep each response under 25 words to maintain voice flow
-- Vapi calls `start_reality_check` tool once enough context is gathered
+### Step 1: Voice Intake With Vapi
 
-### Step 2: Normalize to FounderBrief
-- `POST /api/vapi/tools` receives the tool call
-- Parses args with `FounderBriefSchema.partial()` — only `idea` is required
-- Creates a structured FounderBrief object
+- Founder calls or uses the web call interface.
+- Vapi asks for idea, target user, current alternative, why now, and biggest risk.
+- Keep each response under 25 words.
+- Vapi calls `start_reality_check` once enough context is gathered.
 
-### Step 3: Create Run + Store in Redis
-- Generate `run_${nanoid(10)}` ID
-- `createRun()` writes to `rcl:run:{runId}` with status `queued`
-- Appends `created` event to `rcl:run:{runId}:events`
-- Returns `run_id` to Vapi immediately
+### Step 2: Normalize To FounderBrief
 
-### Step 4: Background Research (TinyFish, 5 lanes in parallel)
-- Triggered via `after()` — runs after HTTP response is sent
-- 5 lanes run concurrently with `Promise.all`:
-  1. **Competitors**: `"${idea} startup validation voice agent competitors pricing"`
-  2. **Substitutes**: `"how do ${target_user} validate startup ideas today reddit"`
-  3. **Pain**: `"${target_user} wasted months building wrong startup idea"`
-  4. **Pricing**: `"startup idea validation software pricing AI market research"`
-  5. **Why Now**: `"voice AI agents founders market research trend 2026"`
-- Per lane: TinyFish Search (up to 5 results) + TinyFish Fetch on top 2 URLs
+- `POST /api/vapi/tools` receives the tool call.
+- Parse args with `FounderBriefSchema.partial()`.
+- Only `idea` is required.
+- Create a structured FounderBrief object.
 
-### Step 5: Store Evidence in Redis
-- Each evidence item: `SET rcl:evidence:{id}`, `RPUSH rcl:run:{runId}:evidence {id}`
-- Event appended: `evidence_found` with sponsor `tinyfish`
-- All keys set with 24h TTL
+### Step 3: Create Run And Store State
+
+- Generate `run_${nanoid(10)}`.
+- `createRun()` writes run metadata with status `queued`.
+- Append a `created` event.
+- Return `run_id` to Vapi immediately.
+
+### Step 4: Background Research With TinyFish
+
+- Trigger via `after()` after the HTTP response is sent.
+- Run five lanes concurrently:
+  1. Competitors
+  2. Substitutes
+  3. Pain signals
+  4. Pricing
+  5. Why-now signals
+- Per lane: TinyFish Search, then TinyFish Fetch for high-value URLs.
+
+### Step 5: Store Evidence
+
+- Store each Evidence object.
+- Append `evidence_found` events with sponsor `tinyfish`.
+- In live mode, persist to Redis with 24h TTL.
+- In demo mode, use in-memory fallback and fixture evidence.
 
 ### Step 6: LLM Synthesis
-- Load run + all evidence from Redis
-- Call OpenAI gpt-4o-mini with `response_format: json_object`
-- Parse with `MarketAtlasSchema.safeParse()`
-- On failure: retry once with repair prompt, fall back to deterministic template
 
-### Step 7: Store Atlas in Redis
-- `SET rcl:run:{runId}:atlas` with the final MarketAtlas JSON
-- `updateRunStatus()` → `complete`
-- Append `complete` event with sponsor `llm`
+- Load run and evidence.
+- Call the configured LLM provider.
+- Parse output with `MarketAtlasSchema.safeParse()`.
+- On failure, build deterministic fallback atlas.
 
-### Step 8: Dashboard + Vapi Response
-- Frontend polls `GET /api/runs/:runId` for status updates
-- When founder calls `get_reality_check_status`, Vapi speaks an 80-word summary
-- Dashboard shows full evidence feed, competitor list, brutal truth, wedge, next experiment
+### Step 7: Store Atlas
+
+- Store final MarketAtlas.
+- Set run status to `complete`.
+- Append a `complete` event.
+
+### Step 8: Dashboard And Voice Response
+
+- Frontend polls `GET /api/runs/:runId`.
+- Dashboard shows event timeline, evidence feed, sponsor trace, and Market Atlas.
+- Vapi reads an 80-word spoken summary.
 
 ## Redis Key Schema
 
-```
-rcl:run:{runId}              → JSON { run_id, status, brief }
-rcl:run:{runId}:events       → List of JSON RunEvent strings
-rcl:run:{runId}:evidence     → List of evidence ID strings
-rcl:evidence:{evidenceId}    → JSON Evidence object
-rcl:run:{runId}:atlas        → JSON MarketAtlas
-rcl:cache:search:{hash}      → cached TinyFish search result (1h TTL)
+```text
+rcl:run:{runId}              -> JSON { run_id, status, brief }
+rcl:run:{runId}:events       -> list of JSON RunEvent strings
+rcl:run:{runId}:evidence     -> list of evidence ID strings
+rcl:evidence:{evidenceId}    -> JSON Evidence object
+rcl:run:{runId}:atlas        -> JSON MarketAtlas
+rcl:cache:search:{hash}      -> cached TinyFish search result
 ```
 
 ## Failure Modes
 
 | Failure | Behavior |
-|---------|---------|
-| TinyFish unavailable | Return fixture evidence, label as demo mode |
-| TinyFish timeout | AbortController at 10s, return empty array, continue pipeline |
-| OpenAI synthesis fails | Retry with repair prompt, then build deterministic fallback atlas |
-| Redis unavailable | Log error, return graceful 500 with retryable: true |
-| Vapi format mismatch | Handle both `toolCallList[]` and `toolCalls[].function` formats |
-| Vapi non-200 response | Always return 200; put error in `result` field to prevent duplicate runs |
+|---------|----------|
+| TinyFish unavailable | Return fixture evidence and continue |
+| TinyFish timeout | Abort after timeout, continue other lanes |
+| LLM synthesis fails | Retry if possible, then use deterministic fallback atlas |
+| Redis unavailable | Use in-memory fallback for demo and health reports `simulated` |
+| Vapi format mismatch | Support both `toolCallList[]` and `toolCalls[].function` formats |
+| Vapi non-200 response risk | Always return HTTP 200 and include errors in `result` |
+
+## Recording Demo Sequence
+
+The `?demo=recording` route animates this sequence:
+
+1. Vapi captures spoken idea.
+2. Vapi asks a hard follow-up question.
+3. Founder brief is created.
+4. TinyFish launches five research lanes.
+5. Competitor evidence appears.
+6. Redis storage event appears.
+7. Substitute and why-now evidence appear.
+8. LLM synthesis starts.
+9. Shipables package event appears.
+10. Vapi speaks final verdict.

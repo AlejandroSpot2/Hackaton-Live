@@ -1,8 +1,8 @@
 ---
 name: realitycheck-live
-description: Run a voice-first startup idea reality check with live web research, Redis memory, and Vapi tool calls.
+description: Voice-first startup idea validation workflow. Use when an agent needs to interview a founder, start a RealityCheck Live run, gather market evidence, store progress, and return a scored Market Atlas with risks and next experiments.
 license: MIT
-compatibility: Requires network access, TinyFish API key, Vapi API key, Redis, OpenAI API key, and a public HTTPS endpoint for Vapi tools.
+compatibility: Works with the RealityCheck Live Next.js app. Live mode requires network access, a public HTTPS app URL, Vapi, TinyFish, Redis, and one LLM provider. Demo mode can run without external services.
 metadata:
   author: alejandrospot2
   version: "1.0.0"
@@ -10,64 +10,96 @@ metadata:
 
 # RealityCheck Live
 
-## When To Use
+RealityCheck Live turns a founder's spoken startup idea into a source-cited market thesis. The agent should behave like a sharp cofounder: ask short follow-up questions, start research, track evidence, and return a clear verdict.
 
-Use this skill when a founder wants to turn a spoken startup idea into a source-cited market thesis — without filling out forms or building a deck. The agent conducts a live market reality check over voice and returns a scored Market Atlas with competitors, substitutes, risks, and a 7-day next experiment.
+## Core Workflow
 
-## Workflow
+1. Capture the idea through voice or text.
+2. Ask only the missing essentials: target user, current alternative, why now, and biggest risk.
+3. Call `start_reality_check` once the idea is clear.
+4. Poll `get_reality_check_status` or `GET /api/runs/:runId`.
+5. Show progress events grouped by sponsor: Vapi, TinyFish, Redis, LLM, Shipables.
+6. Return a Market Atlas with score, brutal truth, wedge, ICP, competitors, substitutes, risks, evidence IDs, and a 7-day next experiment.
+7. Keep spoken responses short. During intake, stay under 25 words per response.
 
-1. **Voice intake** — Vapi assistant asks the founder for their idea, target user, current alternatives, and biggest risk.
-2. **Create founder brief** — normalize spoken input into a structured FounderBrief object via `start_reality_check` tool call.
-3. **Launch research** — trigger 5-lane TinyFish research in parallel: competitors, substitutes, pain signals, pricing, and why-now timing.
-4. **Store state in Redis** — persist run metadata, evidence, and progress events throughout the pipeline.
-5. **Synthesize market atlas** — OpenAI gpt-4o-mini produces a brutally honest MarketAtlas JSON validated with Zod.
-6. **Return verdict** — dashboard updates in real time; Vapi speaks a crisp 80-word summary back to the founder.
-7. **Persist for recall** — final atlas and all evidence stored in Redis with 24h TTL for dashboard access.
+## Repository Entry Points
 
-## Required Tools
+- Frontend dashboard: `src/app/dashboard/page.tsx`
+- Run view and recording demo: `src/app/dashboard/[runId]/page.tsx`
+- Vapi tool endpoint: `src/app/api/vapi/tools/route.ts`
+- Run API: `src/app/api/runs/route.ts` and `src/app/api/runs/[runId]/route.ts`
+- Pipeline: `src/lib/research-pipeline.ts`
+- Redis store: `src/lib/run-store.ts`
+- TinyFish adapter: `src/lib/tinyfish.ts`
+- LLM synthesis: `src/lib/synthesis.ts`
+- Fixtures and recording data: `src/lib/fixtures.ts`
 
-| Tool | Purpose |
-|------|---------|
-| Vapi | Voice conversation + custom tool calls (`start_reality_check`, `get_reality_check_status`) |
-| TinyFish Search API | Competitor and substitute discovery across the web |
-| TinyFish Fetch API | Clean text extraction from high-value source URLs |
-| Redis | Run state, event timeline, evidence store, search cache, final atlas |
-| OpenAI | LLM synthesis of evidence into a scored Market Atlas |
+## Operating Modes
 
-## Environment Variables
+### Live Mode
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `TINYFISH_API_KEY` | Yes | TinyFish API key for live web research |
-| `VAPI_API_KEY` | Yes | Vapi API key for assistant setup and calls |
-| `VAPI_ASSISTANT_ID` | No | Pre-created Vapi assistant ID |
-| `REDIS_URL` | Yes | Redis connection URL (`redis://...`) |
-| `OPENAI_API_KEY` | Yes | OpenAI API key for synthesis |
-| `APP_BASE_URL` | Yes | Public HTTPS base URL (required for Vapi tool endpoint) |
-| `DEMO_MODE` | No | Set to `"true"` to return fixture data without live API calls |
-| `DEMO_SEEDED_RUN_ID` | No | Fixture run ID returned in demo mode (`run_demo_001`) |
+Use live mode when environment variables are configured:
 
-## API Endpoints
+- `APP_BASE_URL`: public HTTPS URL for Vapi tool calls
+- `VAPI_API_KEY` and Vapi assistant/public keys
+- `TINYFISH_API_KEY`
+- `REDIS_URL`
+- one of `OPENAI_API_KEY`, `GROQ_API_KEY`, or `KIMI_API_KEY`
 
-- `POST /api/vapi/tools` — Vapi tool call handler
-- `POST /api/runs` — Create a new run
-- `GET /api/runs/:runId` — Get full run state (brief, events, evidence, atlas)
-- `POST /api/runs/:runId/research` — Trigger research pipeline
-- `POST /api/runs/:runId/synthesize` — Trigger LLM synthesis
-- `GET /api/health` — Health check (includes Redis ping)
+The pipeline should use TinyFish for source discovery, Redis for run state and evidence, and the LLM provider for synthesis.
 
-## Common Mistakes
+### Recording Demo Mode
 
-- Do not generate generic advice without source URLs — every claim in the atlas must be tied to an evidence ID.
-- Do not skip the substitutes lane — judges and founders both want to know what users do today, not just competitors.
-- Do not let Vapi responses exceed 25 words during intake — short responses keep the voice conversation natural.
-- Always return HTTP 200 from `/api/vapi/tools` — Vapi retries on non-200, causing duplicate runs.
-- Echo back the exact `toolCallId` from the incoming Vapi payload — mismatched IDs silently drop results.
+Use recording mode when external services are unavailable or unreliable. Open:
 
-## Fallback Strategy
+```text
+/dashboard/run_demo_001?demo=recording
+```
 
-If TinyFish, OpenAI, or Redis are unavailable:
-- TinyFish unavailable: return fixture evidence from `src/lib/fixtures.ts`, labeled as demo mode.
-- OpenAI unavailable: use deterministic fallback atlas built from collected evidence.
-- Redis unavailable: log error and return a graceful failure response — do not crash.
-- Set `DEMO_MODE=true` for a fully self-contained demo with no live API calls.
+This mode animates the full sponsor story: Vapi intake, TinyFish evidence, Redis storage, LLM synthesis, Shipables packaging, and final verdict. Use it for demo recordings and judging if live APIs fail.
+
+### Fixture Mode
+
+Set `DEMO_MODE=true` to return seeded fixture data from `src/lib/fixtures.ts`.
+
+## API Usage Examples
+
+Create a run:
+
+```bash
+curl -X POST "$APP_BASE_URL/api/runs" \
+  -H "Content-Type: application/json" \
+  -d '{"idea":"voice startup validator","target_user":"first-time founders","current_alternative":"asking friends"}'
+```
+
+Check status:
+
+```bash
+curl "$APP_BASE_URL/api/runs/run_demo_001"
+```
+
+Call the Vapi tool endpoint:
+
+```bash
+curl -X POST "$APP_BASE_URL/api/vapi/tools" \
+  -H "Content-Type: application/json" \
+  -d '{"message":{"type":"tool-calls","toolCallList":[{"id":"tc_1","name":"start_reality_check","arguments":{"idea":"voice startup validator","target_user":"first-time founders"}}]}}'
+```
+
+## Agent Rules
+
+- Do not produce a final verdict until the run is complete or a deterministic fallback is used.
+- Do not invent source evidence. If live research is unavailable, say demo/fixture evidence is being used.
+- Always preserve `toolCallId` in Vapi responses.
+- Always return HTTP 200 from `/api/vapi/tools`; put failures inside the result body to prevent Vapi retries.
+- Prefer concrete next experiments over generic advice.
+- Keep final spoken summaries under 80 words.
+- Treat Redis as the source of truth in live mode; use in-memory fallback only for demos.
+
+## References
+
+Load these only when needed:
+
+- `references/api-contracts.md`: endpoint payloads, response shapes, and Vapi tool definitions.
+- `references/demo-prompts.md`: assistant prompt, TinyFish query templates, score rubric, and curl checks.
+- `references/realitycheck-workflow.md`: full eight-step pipeline and Redis key schema.

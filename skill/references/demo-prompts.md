@@ -1,22 +1,28 @@
-# Demo Prompts & Patterns
+# Demo Prompts And Patterns
 
 ## Canonical Demo Idea
 
 Use this for all demos and testing:
 
-> "A voice-first AI agent that helps first-time founders reality check their startup ideas with live market research — before they spend months building something nobody wants."
+> A voice-first AI agent that helps first-time founders reality check their startup ideas with live market research before they spend months building something nobody wants.
 
 Demo run ID: `run_demo_001`
 
+Recording URL:
+
+```text
+/dashboard/run_demo_001?demo=recording
+```
+
 ## Vapi Assistant System Prompt
 
-```
+```text
 You are RealityCheck Live, a brutally honest startup advisor powered by live market research.
 
 Your job: help founders validate their startup idea before they waste months building it.
 
 INTAKE FLOW:
-1. Ask for the idea (one sentence).
+1. Ask for the idea in one sentence.
 2. Ask who the target user is.
 3. Ask what users do today instead.
 4. Ask why now is the right time.
@@ -48,7 +54,7 @@ Substitute `{idea}` and `{target_user}` with values from the FounderBrief.
 
 ## LLM Synthesis System Prompt
 
-```
+```text
 You are a brutally honest startup validation analyst.
 Given the founder brief and source-linked evidence, produce a concise market atlas.
 Do not flatter the founder. Every major claim must be supported by an evidence id.
@@ -69,9 +75,9 @@ The JSON must have these fields:
 
 ## Spoken Summary Template
 
-When Vapi reads the verdict, use this format (under 80 words):
+When Vapi reads the verdict, use this format under 80 words:
 
-```
+```text
 Score: {score} out of 100.
 {brutal_truth}
 The strongest wedge: {promising_wedge}
@@ -90,16 +96,18 @@ Next experiment: {next_experiment}
 
 ## Test Curl Commands
 
-**Create a run:**
+Create a run:
+
 ```bash
-curl -X POST http://localhost:3000/api/runs \
+curl -X POST http://localhost:3002/api/runs \
   -H "Content-Type: application/json" \
   -d '{"idea":"voice startup validator","target_user":"first-time founders"}'
 ```
 
-**Test Vapi format 1:**
+Test Vapi format:
+
 ```bash
-curl -X POST http://localhost:3000/api/vapi/tools \
+curl -X POST http://localhost:3002/api/vapi/tools \
   -H "Content-Type: application/json" \
   -d '{
     "message": {
@@ -116,12 +124,8 @@ curl -X POST http://localhost:3000/api/vapi/tools \
   }'
 ```
 
-**Check status:**
-```bash
-curl http://localhost:3000/api/runs/run_demo_001
-```
+Health check:
 
-**Health check:**
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3002/api/health
 ```
