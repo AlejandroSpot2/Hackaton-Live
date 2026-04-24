@@ -153,10 +153,11 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json(
-      { error: { code: "BAD_REQUEST", message: "Invalid JSON", retryable: false } },
-      { status: 400 }
-    );
+    // Always return 200 for Vapi — non-200 causes retries and duplicate runs
+    return NextResponse.json({
+      results: [],
+      error: { code: "BAD_REQUEST", message: "Invalid JSON body", retryable: false },
+    });
   }
 
   // Log every incoming Vapi payload for debugging during hackathon
