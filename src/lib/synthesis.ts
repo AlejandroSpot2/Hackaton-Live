@@ -74,7 +74,7 @@ function buildFallbackAtlas(run: Run): MarketAtlas {
     target_icp: run.brief.target_user,
     competitors: competitors.slice(0, 3),
     substitutes: substitutes.slice(0, 3),
-    risks: ["Synthesis failed — manual validation required"],
+    risks: ["Synthesis failed - manual validation required"],
     next_experiment: "Review collected evidence manually and run synthesis again",
     evidence_ids: run.evidence.map((e) => e.id),
   };
