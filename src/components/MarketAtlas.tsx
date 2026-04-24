@@ -4,70 +4,91 @@ import { MarketAtlas as Atlas } from "@/lib/types";
 interface Props { atlas: Atlas; }
 
 export default function MarketAtlas({ atlas }: Props) {
-  const scoreClass = atlas.score >= 70
-    ? "from-lime-300 to-emerald-400 text-[#06120A]"
-    : atlas.score >= 50
-      ? "from-amber-300 to-orange-400 text-[#160B02]"
-      : "from-rose-400 to-fuchsia-500 text-white";
+  const { score } = atlas;
+  const tier =
+    score >= 70 ? { label: "STRONG SIGNAL", bar: "from-lime-400 to-emerald-400", text: "text-lime-300", glow: "shadow-lime-500/30" } :
+    score >= 50 ? { label: "MODERATE RISK", bar: "from-amber-400 to-orange-400", text: "text-amber-300", glow: "shadow-amber-500/20" } :
+                  { label: "RED FLAGS", bar: "from-rose-500 to-fuchsia-500", text: "text-rose-300", glow: "shadow-rose-500/30" };
 
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-white/[0.08] shadow-2xl shadow-cyan-950/30 backdrop-blur-xl">
-      <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.06] px-5 py-4">
-        <h2 className="text-xs font-black uppercase tracking-[0.24em] text-cyan-100/80">Market Atlas</h2>
-        <span className={`rounded-full bg-gradient-to-r px-4 py-2 font-mono text-sm font-black shadow-lg ${scoreClass}`}>{atlas.score}/100</span>
+    <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06] shadow-2xl shadow-cyan-950/30 backdrop-blur-xl">
+
+      {/* Score hero */}
+      <div className="relative flex flex-col items-center gap-2 border-b border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-950/80 px-6 py-8 text-center">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Reality Score</p>
+        <div className={`font-mono text-8xl font-black leading-none ${tier.text} drop-shadow-2xl`}>{score}</div>
+        <div className="relative mt-1 h-2 w-48 overflow-hidden rounded-full bg-white/10">
+          <div
+            className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r shadow-lg transition-all duration-1000 ${tier.bar} ${tier.glow}`}
+            style={{ width: `${score}%` }}
+          />
+        </div>
+        <span className={`mt-1 rounded-full border px-4 py-1 text-[10px] font-black uppercase tracking-[0.24em] ${tier.text} border-current/30`}>{tier.label}</span>
+        <p className="mt-3 max-w-xl text-base font-black leading-7 text-white">{atlas.one_line_thesis}</p>
       </div>
 
-      <div className="space-y-5 px-5 py-5">
-        <p className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-lg font-black leading-7 text-white shadow-lg shadow-cyan-950/20">{atlas.one_line_thesis}</p>
+      <div className="grid gap-4 p-5 md:grid-cols-2">
 
-        <Section label="Brutal Truth" color="text-rose-200">{atlas.brutal_truth}</Section>
-        <Section label="Promising Wedge" color="text-lime-200">{atlas.promising_wedge}</Section>
-        <Section label="Target ICP" color="text-cyan-200">{atlas.target_icp}</Section>
+        {/* Brutal Truth */}
+        <div className="col-span-2 rounded-2xl border border-rose-300/20 bg-rose-300/5 p-4">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-rose-400">Brutal Truth</p>
+          <p className="text-sm leading-6 text-slate-200">{atlas.brutal_truth}</p>
+        </div>
 
-        <div>
-          <Label color="text-orange-200">Competitors</Label>
+        {/* Promising Wedge */}
+        <div className="rounded-2xl border border-lime-300/20 bg-lime-300/5 p-4">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-lime-400">Promising Wedge</p>
+          <p className="text-sm leading-6 text-slate-200">{atlas.promising_wedge}</p>
+        </div>
+
+        {/* Target ICP */}
+        <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/5 p-4">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Target ICP</p>
+          <p className="text-sm leading-6 text-slate-200">{atlas.target_icp}</p>
+        </div>
+
+        {/* Competitors */}
+        <div className="rounded-2xl border border-orange-300/20 bg-orange-300/5 p-4">
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] text-orange-400">Competitors</p>
           <ul className="space-y-2">
             {atlas.competitors.map((c) => (
-              <li key={c.name} className="rounded-2xl border border-white/10 bg-slate-950/35 p-3 text-sm text-slate-300">
-                <a href={c.url} target="_blank" rel="noopener noreferrer" className="font-black text-orange-200 hover:text-orange-100 hover:underline">{c.name}</a>
-                <span className="text-slate-500"> - {c.notes}</span>
+              <li key={c.name} className="flex flex-col gap-1 rounded-xl border border-white/10 bg-slate-950/40 p-3">
+                <a href={c.url} target="_blank" rel="noopener noreferrer"
+                  className="text-sm font-black text-orange-200 hover:underline">{c.name}</a>
+                <span className="text-xs text-slate-400">{c.notes}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <ListSection label="Substitutes" color="text-cyan-200" items={atlas.substitutes} />
-        <ListSection label="Risks" color="text-rose-200" items={atlas.risks} />
-        <Section label="Next Experiment" color="text-violet-200">{atlas.next_experiment}</Section>
+        {/* Risks */}
+        <div className="rounded-2xl border border-rose-300/20 bg-rose-300/5 p-4">
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] text-rose-400">Risks</p>
+          <ul className="space-y-2">
+            {atlas.risks.map((r) => (
+              <li key={r} className="flex items-start gap-2 text-xs leading-5 text-slate-300">
+                <span className="mt-px shrink-0 text-rose-400">▲</span>{r}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Substitutes */}
+        <div className="col-span-2 rounded-2xl border border-violet-300/20 bg-violet-300/5 p-4">
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] text-violet-400">Substitutes Today</p>
+          <div className="flex flex-wrap gap-2">
+            {atlas.substitutes.map((s) => (
+              <span key={s} className="rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1 text-xs font-bold text-violet-200">{s}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Next Experiment */}
+        <div className="col-span-2 rounded-2xl border border-cyan-300/25 bg-gradient-to-r from-cyan-300/10 to-fuchsia-300/10 p-4">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-cyan-400">Next Experiment — 7 Days</p>
+          <p className="text-sm font-bold leading-6 text-white">{atlas.next_experiment}</p>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function Label({ color, children }: { color: string; children: React.ReactNode }) {
-  return <p className={`mb-2 text-[10px] font-black uppercase tracking-[0.22em] ${color}`}>{children}</p>;
-}
-
-function Section({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-4">
-      <Label color={color}>{label}</Label>
-      <p className="text-sm leading-6 text-slate-300">{children}</p>
-    </div>
-  );
-}
-
-function ListSection({ label, color, items }: { label: string; color: string; items: string[] }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-4">
-      <Label color={color}>{label}</Label>
-      <ul className="list-none space-y-2">
-        {items.map((item) => (
-          <li key={item} className="text-sm text-slate-300">
-            <span className="font-black text-cyan-200">›</span> {item}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
