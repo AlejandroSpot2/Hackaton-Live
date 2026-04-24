@@ -45,7 +45,13 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-black tracking-tight text-white">Validate the idea before it wastes your weekend.</h1>
             <p className="mt-2 text-sm leading-6 text-slate-300">Talk to Vapi. It captures the founder brief, starts research, and sends you straight to the live market readout.</p>
           </div>
-          <VapiButton onRunCreated={(runId) => router.push(`/dashboard/${runId}`)} />
+          <VapiButton onRunCreated={(runId) => {
+            if (runId.startsWith("demo:")) {
+              router.push(`/dashboard/${runId.slice(5)}?demo=running`);
+            } else {
+              router.push(`/dashboard/${runId}`);
+            }
+          }} />
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <Stat label="Avg research time" value="28s" tone="cyan" />
             <Stat label="Evidence sources" value="5-12" tone="fuchsia" />

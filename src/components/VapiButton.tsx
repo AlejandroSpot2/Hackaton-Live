@@ -11,9 +11,7 @@ interface Props {
 
 interface ToolCallResult {
   name?: string;
-  result?: {
-    run_id?: string;
-  };
+  result?: { run_id?: string };
 }
 
 interface VapiMessage {
@@ -36,16 +34,29 @@ export default function VapiButton({ onRunCreated }: Props) {
       ...(message.message?.toolCallList ?? []),
       ...(message.message?.results ?? []),
     ];
-
-    const runId = toolCalls.find((toolCall) => toolCall.name === "start_reality_check")?.result?.run_id;
+    const runId = toolCalls.find((tc) => tc.name === "start_reality_check")?.result?.run_id;
     if (runId) onRunCreated(runId);
+  }
+
+  function runDemoSimulation() {
+    setStatus("connecting");
+    setTimeout(() => {
+      setStatus("active");
+      setTimeout(() => {
+        setStatus("ended");
+        onRunCreated("demo:run_live_002");
+      }, 3000);
+    }, 1200);
   }
 
   async function startCall() {
     const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
     const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
 
-    if (!publicKey || !assistantId) return;
+    if (!publicKey || !assistantId) {
+      runDemoSimulation();
+      return;
+    }
 
     setStatus("connecting");
     const vapi = new Vapi(publicKey);
@@ -70,14 +81,20 @@ export default function VapiButton({ onRunCreated }: Props) {
 
   const isActive = status === "active";
   const isConnecting = status === "connecting";
-  const label = isActive ? "Stop live call" : isConnecting ? "Connecting..." : status === "ended" ? "Start again" : "Start voice check";
-  const buttonClass = isActive
-    ? "w-full animate-pulse rounded-2xl border border-rose-300/40 bg-gradient-to-r from-rose-500 to-fuchsia-600 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-white shadow-2xl shadow-rose-500/30 transition hover:from-rose-400 hover:to-fuchsia-500"
-    : isConnecting
-      ? "w-full cursor-wait rounded-2xl border border-cyan-300/25 bg-white/10 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-cyan-100 shadow-xl shadow-cyan-500/10"
-      : status === "ended"
-        ? "w-full rounded-2xl border border-fuchsia-300/30 bg-white/10 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-fuchsia-100 shadow-xl shadow-fuchsia-500/10 transition hover:bg-white/15"
-        : "w-full rounded-2xl border border-cyan-200/40 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-lime-300 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-[#070A18] shadow-2xl shadow-cyan-500/30 transition hover:scale-[1.01] hover:shadow-fuchsia-500/30";
+  const label =
+    isActive ? "Stop live call" :
+    isConnecting ? "Connecting..." :
+    status === "ended" ? "Start again" :
+    "Start voice check";
+
+  const buttonClass =
+    isActive
+      ? "w-full animate-pulse rounded-2xl border border-rose-300/40 bg-gradient-to-r from-rose-500 to-fuchsia-600 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-white shadow-2xl shadow-rose-500/30 transition hover:from-rose-400 hover:to-fuchsia-500"
+      : isConnecting
+        ? "w-full cursor-wait rounded-2xl border border-cyan-300/25 bg-white/10 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-cyan-100 shadow-xl shadow-cyan-500/10"
+        : status === "ended"
+          ? "w-full rounded-2xl border border-fuchsia-300/30 bg-white/10 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-fuchsia-100 shadow-xl shadow-fuchsia-500/10 transition hover:bg-white/15"
+          : "w-full rounded-2xl border border-cyan-200/40 bg-gradient-to-r from-cyan-300 via-fuchsia-400 to-lime-300 px-6 py-5 text-base font-black uppercase tracking-[0.18em] text-[#070A18] shadow-2xl shadow-cyan-500/30 transition hover:scale-[1.01] hover:shadow-fuchsia-500/30";
 
   return (
     <button
