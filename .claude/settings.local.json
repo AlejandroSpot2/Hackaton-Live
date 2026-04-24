@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000/api/health)",
+      "Bash(curl -s http://localhost:3001/api/health)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(ln -sf /Users/mauriciocarenanew/Projects/Hackaton-Live/.env /Users/mauriciocarenanew/Projects/Hackaton-Live/.claude/worktrees/jolly-lamarr-f01a7f/.env)",
+      "Bash(python3 -c ' *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Skill(gsd-next)",
+      "Skill(gsd-next:*)",
+      "Bash(curl -s -X POST http://localhost:3000/api/runs -H 'Content-Type: application/json' -d '{\"idea\":\"voice AI agent for startup validation\",\"target_user\":\"first-time founders\"}')",
+      "Bash(lsof -ti:3000)",
+      "Bash(lsof -ti:3001)",
+      "Bash(git pull *)",
+      "Bash(git fetch *)",
+      "Bash(git rebase *)",
+      "Bash(git checkout *)",
+      "Bash(GIT_EDITOR=true git rebase --continue)",
+      "Bash(git commit *)"
+    ]
+  }
+}

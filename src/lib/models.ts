@@ -6,6 +6,7 @@ export const FounderBriefSchema = z.object({
   pain: z.string().default(""),
   current_alternative: z.string().default(""),
   why_now: z.string().default(""),
+  biggest_risk: z.string().default(""),
   constraints: z.array(z.string()).default([]),
   unknowns: z.array(z.string()).default([]),
 });

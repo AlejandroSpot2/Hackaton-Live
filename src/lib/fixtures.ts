@@ -149,6 +149,40 @@ export const DEMO_ATLAS: MarketAtlas = {
   ],
 };
 
+export const RUNNING_RUN: Run = {
+  run_id: "run_live_002",
+  status: "running",
+  brief: {
+    idea: "AI tool that writes cold emails personalized from LinkedIn profiles",
+    target_user: "B2B sales reps at SMBs",
+    pain: "Manually researching LinkedIn profiles before every cold email takes too long",
+    current_alternative: "Copy-pasting from LinkedIn manually",
+    why_now: "GPT-4 made personalization cheap; Apollo and Clay are too complex",
+    biggest_risk: "Gmail spam filters block AI-written emails",
+    constraints: [],
+    unknowns: [],
+  },
+  events: [
+    { id: "evt_101", run_id: "run_live_002", type: "created", message: "Run created from voice intake", sponsor: "vapi", created_at: "2026-04-24T10:05:00Z" },
+    { id: "evt_102", run_id: "run_live_002", type: "research_started", message: "Searching for competitors in AI cold email space", sponsor: "tinyfish", created_at: "2026-04-24T10:05:03Z" },
+    { id: "evt_103", run_id: "run_live_002", type: "evidence_found", message: "Found Apollo.io, Clay, Instantly — crowded space", sponsor: "tinyfish", created_at: "2026-04-24T10:05:11Z" },
+  ],
+  evidence: [
+    {
+      id: "ev_101",
+      run_id: "run_live_002",
+      url: "https://apollo.io",
+      title: "Apollo.io - Sales Intelligence Platform",
+      snippet: "Trusted by 500,000+ companies for outbound sales.",
+      claim: "Apollo has massive market share and LinkedIn integration already",
+      evidence_type: "competitor",
+      confidence: 0.96,
+      source_tool: "tinyfish_search",
+    },
+  ],
+  atlas: null,
+};
+
 export const DEMO_RUN: Run = {
   run_id: DEMO_SEEDED_RUN_ID,
   status: "demo_fallback",
@@ -158,6 +192,7 @@ export const DEMO_RUN: Run = {
     pain: "Founders spend 6-12 months building products nobody wants because they skip market validation",
     current_alternative: "Manual Reddit outreach, cold DMs, and spreadsheets",
     why_now: "Voice AI agents hit mainstream B2B adoption in 2026; Vapi makes voice-first tools buildable in a weekend",
+    biggest_risk: "Founders ignore brutal feedback and build anyway",
     constraints: ["bootstrapped", "solo founder", "no design background"],
     unknowns: ["willingness to pay before seeing results", "voice vs async preference"],
   },
