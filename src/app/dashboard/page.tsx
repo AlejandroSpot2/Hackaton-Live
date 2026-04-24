@@ -9,11 +9,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    idea: "A browser extension that automatically tracks billable hours for freelance developers by detecting active coding sessions per project repo and generates ready-to-send invoices, eliminating manual time logging entirely.",
-    target_user: "Freelance software developers juggling 2–4 simultaneous client projects, billing hourly, who context-switch constantly and lose track of time across repos.",
-    current_alternative: "Toggl or Clockify with manual start/stop (frequently forgotten), spreadsheets reconstructed from git commit timestamps at end of month, or flat-rate billing just to avoid the tracking headache.",
-    why_now: "The freelance dev market exploded post-2022 layoffs; the average freelancer now runs multiple concurrent contracts. Browser-native AI can now accurately classify active vs. idle coding time without a heavyweight desktop app, and Stripe's updated Connect API makes invoice-to-payment a single integration.",
-    biggest_risk: "Developers are the most capable group at building their own version of this in a weekend — the moment it gets any traction, the target user cohort will either clone it or expect it to be free forever, making willingness-to-pay close to zero.",
+    idea: "A mobile app that scans your fridge and pantry via photo and generates a personalized weekly meal plan with a consolidated grocery list, reducing food waste and decision fatigue for busy households.",
+    target_user: "Couples or small families (2–4 people) aged 25–40, cooking at home 4+ nights a week, who want to eat healthier but spend 20+ minutes every Sunday stressing about what to buy and cook that week.",
+    current_alternative: "Pinterest boards they never revisit, Google \"easy weeknight dinners,\" manually write grocery lists on Notes app, buy ingredients for 3 meals and end up with random leftovers rotting in the fridge by Thursday.",
+    why_now: "Multimodal vision models (GPT-4o, Gemini) finally make fridge-scanning accurate enough to be actually useful rather than a gimmick; grocery delivery API integrations (Instacart, Walmart) allow one-tap ordering from the generated list, closing the loop completely.",
+    biggest_risk: "Habit formation is brutally hard — users try it once, think it's cool, then forget to open the app the following Sunday. Retention after week 3 will likely collapse unless there's an aggressive notification/reminder loop, which risks becoming the exact kind of annoying app people delete.",
   });
 
   async function handleSubmit(e: React.FormEvent) {
