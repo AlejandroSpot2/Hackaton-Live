@@ -1,7 +1,9 @@
 import { Run } from "./types";
 
+export const DEMO_SEEDED_RUN_ID = "run_demo_001";
+
 export const DEMO_RUN: Run = {
-  run_id: "run_demo_001",
+  run_id: DEMO_SEEDED_RUN_ID,
   status: "complete",
   brief: {
     idea: "Voice agent that validates startup ideas in real time during a conversation",
@@ -11,17 +13,17 @@ export const DEMO_RUN: Run = {
     biggest_risk: "Founders ignore brutal feedback and build anyway",
   },
   events: [
-    { id: "evt_001", run_id: "run_demo_001", type: "created", message: "Run created from voice intake", sponsor: "vapi", created_at: "2026-04-24T10:00:00Z" },
-    { id: "evt_002", run_id: "run_demo_001", type: "research_started", message: "Starting market research across 5 lanes", sponsor: "tinyfish", created_at: "2026-04-24T10:00:02Z" },
-    { id: "evt_003", run_id: "run_demo_001", type: "evidence_found", message: "Found 3 direct competitors in startup validation space", sponsor: "tinyfish", created_at: "2026-04-24T10:00:08Z" },
-    { id: "evt_004", run_id: "run_demo_001", type: "evidence_found", message: "Pricing anchors identified: $49-$299/mo range", sponsor: "tinyfish", created_at: "2026-04-24T10:00:14Z" },
-    { id: "evt_005", run_id: "run_demo_001", type: "evidence_found", message: "Pain signals found: 847 Reddit threads on 'wasted 6 months building wrong thing'", sponsor: "tinyfish", created_at: "2026-04-24T10:00:19Z" },
-    { id: "evt_006", run_id: "run_demo_001", type: "synthesis_started", message: "Evidence stored. Generating market atlas.", sponsor: "redis", created_at: "2026-04-24T10:00:21Z" },
-    { id: "evt_007", run_id: "run_demo_001", type: "complete", message: "Market atlas ready. Score: 72/100.", sponsor: "llm", created_at: "2026-04-24T10:00:28Z" },
+    { id: "evt_001", run_id: DEMO_SEEDED_RUN_ID, type: "created", message: "Run created from voice intake", sponsor: "vapi", created_at: "2026-04-24T10:00:00Z" },
+    { id: "evt_002", run_id: DEMO_SEEDED_RUN_ID, type: "research_started", message: "Starting market research across 5 lanes", sponsor: "tinyfish", created_at: "2026-04-24T10:00:02Z" },
+    { id: "evt_003", run_id: DEMO_SEEDED_RUN_ID, type: "evidence_found", message: "Found 3 direct competitors in startup validation space", sponsor: "tinyfish", created_at: "2026-04-24T10:00:08Z" },
+    { id: "evt_004", run_id: DEMO_SEEDED_RUN_ID, type: "evidence_found", message: "Pricing anchors identified: $49-$299/mo range", sponsor: "tinyfish", created_at: "2026-04-24T10:00:14Z" },
+    { id: "evt_005", run_id: DEMO_SEEDED_RUN_ID, type: "evidence_found", message: "Pain signals found: 847 Reddit threads on 'wasted 6 months building wrong thing'", sponsor: "tinyfish", created_at: "2026-04-24T10:00:19Z" },
+    { id: "evt_006", run_id: DEMO_SEEDED_RUN_ID, type: "synthesis_started", message: "Evidence stored. Generating market atlas.", sponsor: "redis", created_at: "2026-04-24T10:00:21Z" },
+    { id: "evt_007", run_id: DEMO_SEEDED_RUN_ID, type: "complete", message: "Market atlas ready. Score: 72/100.", sponsor: "llm", created_at: "2026-04-24T10:00:28Z" },
   ],
   evidence: [
     {
-      id: "ev_001", run_id: "run_demo_001",
+      id: "ev_001", run_id: DEMO_SEEDED_RUN_ID,
       url: "https://validation.agency",
       title: "Validation Agency - Startup Idea Validation Service",
       snippet: "We charge $299 per validated idea report, delivered in 48 hours.",
@@ -30,7 +32,7 @@ export const DEMO_RUN: Run = {
       source_tool: "tinyfish_search",
     },
     {
-      id: "ev_002", run_id: "run_demo_001",
+      id: "ev_002", run_id: DEMO_SEEDED_RUN_ID,
       url: "https://ideacheck.io",
       title: "IdeaCheck - AI Startup Validator",
       snippet: "Answer 20 questions and get an instant score.",
@@ -39,7 +41,7 @@ export const DEMO_RUN: Run = {
       source_tool: "tinyfish_search",
     },
     {
-      id: "ev_003", run_id: "run_demo_001",
+      id: "ev_003", run_id: DEMO_SEEDED_RUN_ID,
       url: "https://reddit.com/r/startups/comments/abc123",
       title: "I spent 6 months building something nobody wanted",
       snippet: "Talked to 3 friends who said 'cool idea' and started coding. Big mistake.",
@@ -48,7 +50,7 @@ export const DEMO_RUN: Run = {
       source_tool: "tinyfish_fetch",
     },
     {
-      id: "ev_004", run_id: "run_demo_001",
+      id: "ev_004", run_id: DEMO_SEEDED_RUN_ID,
       url: "https://producthunt.com/posts/founder-insights",
       title: "Founder Insights - $49/mo for market reports",
       snippet: "Weekly curated market intelligence for early founders.",
@@ -57,7 +59,7 @@ export const DEMO_RUN: Run = {
       source_tool: "tinyfish_search",
     },
     {
-      id: "ev_005", run_id: "run_demo_001",
+      id: "ev_005", run_id: DEMO_SEEDED_RUN_ID,
       url: "https://techcrunch.com/2025/ai-voice-tools",
       title: "The voice AI wave is hitting enterprise - startups next",
       snippet: "Voice-first tools saw 340% YoY growth in developer adoption in 2025.",
@@ -115,3 +117,8 @@ export const RUNNING_RUN: Run = {
   ],
   atlas: null,
 };
+
+export const DEMO_EVIDENCE_LIST = DEMO_RUN.evidence.map((evidence) => ({
+  ...evidence,
+  source_tool: evidence.source_tool === "tinyfish_agent" ? "tinyfish_search" : evidence.source_tool,
+}));
