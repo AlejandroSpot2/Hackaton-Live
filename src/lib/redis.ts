@@ -7,7 +7,7 @@ export function getRedis(): Redis {
     const url = process.env.REDIS_URL;
     if (!url) throw new Error("REDIS_URL is not set");
     client = new Redis(url, {
-      connectTimeout: 250,
+      connectTimeout: 2000,
       enableOfflineQueue: false,
       maxRetriesPerRequest: 0,
       lazyConnect: false,

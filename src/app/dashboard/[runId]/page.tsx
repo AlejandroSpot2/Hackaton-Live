@@ -31,6 +31,7 @@ export default function RunPage() {
     setError(null);
     if (demoParam === "true") { setRun(DEMO_RUN); return; }
     if (demoParam === "running") { setRun(RUNNING_RUN); return; }
+    if (demoParam === "recording") { setRun(makeRecordingRun()); return; }
 
     const stop = pollRun(runId, setRun, (e) => setError(e.message));
     return stop;
@@ -51,6 +52,19 @@ export default function RunPage() {
       setRun((current) => simulateRunningRun(current ?? RUNNING_RUN, tick));
       if (tick >= 4) window.clearInterval(interval);
     }, 1800);
+
+    return () => window.clearInterval(interval);
+  }, [demoParam]);
+
+  useEffect(() => {
+    if (demoParam !== "recording") return;
+
+    let tick = 0;
+    const interval = window.setInterval(() => {
+      tick += 1;
+      setRun((current) => simulateRecordingRun(current ?? makeRecordingRun(), tick));
+      if (tick >= 8) window.clearInterval(interval);
+    }, 1550);
 
     return () => window.clearInterval(interval);
   }, [demoParam]);
@@ -114,11 +128,164 @@ export default function RunPage() {
 
       {!isTerminal && (
         <p className="animate-pulse text-center font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-200/70">
-          {demoParam === "running" ? "Demo stream advancing" : "Polling every 2s"}
+          {demoParam === "recording" ? "Recorded sponsor demo playing" : demoParam === "running" ? "Demo stream advancing" : "Polling every 2s"}
         </p>
       )}
     </main>
   );
+}
+
+function makeRecordingRun(): Run {
+  const now = new Date().toISOString();
+
+  return {
+    ...DEMO_RUN,
+    run_id: "run_recorded_voice_demo",
+    status: "running",
+    events: [
+      {
+        id: "rec_evt_001",
+        run_id: "run_recorded_voice_demo",
+        type: "created",
+        message: "Vapi captured the founder's spoken idea",
+        sponsor: "vapi",
+        created_at: now,
+      },
+      {
+        id: "rec_evt_002",
+        run_id: "run_recorded_voice_demo",
+        type: "created",
+        message: "Vapi asked: who exactly is the first user?",
+        sponsor: "vapi",
+        created_at: now,
+      },
+    ],
+    evidence: [],
+    atlas: null,
+  };
+}
+
+function addRecordingEvent(run: Run, id: string, message: string, sponsor: Run["events"][number]["sponsor"], type: Run["events"][number]["type"]): Run {
+  if (run.events.some((event) => event.id === id)) return run;
+
+  return {
+    ...run,
+    events: [
+      ...run.events,
+      {
+        id,
+        run_id: run.run_id,
+        type,
+        message,
+        sponsor,
+        created_at: new Date().toISOString(),
+      },
+    ],
+  };
+}
+
+function addRecordingEvidence(run: Run, ids: string[]): Run {
+  const existing = new Set(run.evidence.map((item) => item.id));
+  const nextEvidence = DEMO_RUN.evidence
+    .filter((item) => ids.includes(item.id) && !existing.has(item.id))
+    .map((item) => ({ ...item, run_id: run.run_id }));
+
+  if (nextEvidence.length === 0) return run;
+  return { ...run, evidence: [...run.evidence, ...nextEvidence] };
+}
+
+function simulateRecordingRun(current: Run, tick: number): Run {
+  if (tick === 1) {
+    return addRecordingEvent(
+      current,
+      "rec_evt_003",
+      "Founder brief created from voice transcript",
+      "vapi",
+      "created"
+    );
+  }
+
+  if (tick === 2) {
+    return addRecordingEvent(
+      current,
+      "rec_evt_004",
+      "TinyFish launched 5 live research lanes",
+      "tinyfish",
+      "research_started"
+    );
+  }
+
+  if (tick === 3) {
+    const withEvidence = addRecordingEvidence(current, ["ev_001", "ev_002"]);
+    return addRecordingEvent(
+      withEvidence,
+      "rec_evt_005",
+      "TinyFish found direct competitors with pricing and positioning",
+      "tinyfish",
+      "evidence_found"
+    );
+  }
+
+  if (tick === 4) {
+    const withEvidence = addRecordingEvidence(current, ["ev_003"]);
+    return addRecordingEvent(
+      withEvidence,
+      "rec_evt_006",
+      "Redis stored run state, events, and source memory",
+      "redis",
+      "evidence_found"
+    );
+  }
+
+  if (tick === 5) {
+    const withEvidence = addRecordingEvidence(current, ["ev_004", "ev_005"]);
+    return addRecordingEvent(
+      withEvidence,
+      "rec_evt_007",
+      "TinyFish added substitutes and why-now evidence",
+      "tinyfish",
+      "evidence_found"
+    );
+  }
+
+  if (tick === 6) {
+    return addRecordingEvent(
+      current,
+      "rec_evt_008",
+      "LLM synthesis started from source-linked evidence",
+      "llm",
+      "synthesis_started"
+    );
+  }
+
+  if (tick === 7) {
+    return addRecordingEvent(
+      current,
+      "rec_evt_009",
+      "Shipables package ready for reusable agent workflow",
+      "shipables",
+      "complete"
+    );
+  }
+
+  if (tick >= 8) {
+    const withEvent = addRecordingEvent(
+      current,
+      "rec_evt_010",
+      "Vapi speaks the final verdict back to the founder",
+      "vapi",
+      "complete"
+    );
+
+    return {
+      ...withEvent,
+      status: "complete",
+      evidence: DEMO_RUN.evidence.map((item) => ({ ...item, run_id: withEvent.run_id })),
+      atlas: DEMO_RUN.atlas,
+    };
+  }
+
+  return current;
 }
 
 function simulateRunningRun(current: Run, tick: number): Run {

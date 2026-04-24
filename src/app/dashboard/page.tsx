@@ -46,6 +46,13 @@ export default function DashboardPage() {
             <p className="mt-2 text-sm leading-6 text-slate-300">Talk to Vapi. It captures the founder brief, starts research, and sends you straight to the live market readout.</p>
           </div>
           <VapiButton onRunCreated={(runId) => router.push(`/dashboard/${runId}`)} />
+          <button
+            type="button"
+            onClick={() => router.push(`/dashboard/${DEMO_RUN.run_id}?demo=recording`)}
+            className="mt-3 w-full rounded-2xl border border-lime-300/40 bg-lime-300/15 px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-lime-100 shadow-xl shadow-lime-500/10 transition hover:bg-lime-300/25"
+          >
+            Play recorded Vapi demo
+          </button>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <Stat label="Avg research time" value="28s" tone="cyan" />
             <Stat label="Evidence sources" value="5-12" tone="fuchsia" />
@@ -123,6 +130,12 @@ export default function DashboardPage() {
             className="rounded-full border border-fuchsia-300/35 bg-fuchsia-300/10 px-4 py-2 text-sm font-bold text-fuchsia-100 transition hover:bg-fuchsia-300/20"
           >
             View running run
+          </button>
+          <button
+            onClick={() => router.push(`/dashboard/${DEMO_RUN.run_id}?demo=recording`)}
+            className="rounded-full border border-lime-300/35 bg-lime-300/10 px-4 py-2 text-sm font-bold text-lime-100 transition hover:bg-lime-300/20"
+          >
+            Play full sponsor demo
           </button>
         </div>
       </section>
