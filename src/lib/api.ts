@@ -1,9 +1,7 @@
 import { Run, FounderBrief } from "./types";
 
-const BASE = process.env.NEXT_PUBLIC_APP_BASE_URL ?? "http://localhost:3000";
-
 export async function createRun(brief: FounderBrief & { source: string }): Promise<{ run_id: string }> {
-  const res = await fetch(`${BASE}/api/runs`, {
+  const res = await fetch(`/api/runs`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(brief),
@@ -13,7 +11,7 @@ export async function createRun(brief: FounderBrief & { source: string }): Promi
 }
 
 export async function getRun(runId: string): Promise<Run> {
-  const res = await fetch(`${BASE}/api/runs/${runId}`);
+  const res = await fetch(`/api/runs/${runId}`);
   if (!res.ok) throw new Error("Failed to fetch run");
   return res.json();
 }
