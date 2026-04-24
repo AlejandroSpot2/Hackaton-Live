@@ -7,14 +7,13 @@ let openaiClient: OpenAI | null = null;
 
 function getOpenAI(): OpenAI {
   if (!openaiClient) {
-    // Support OpenAI or Kimi (OpenAI-compatible)
+    const groqKey = process.env.GROQ_API_KEY;
     const kimiKey = process.env.KIMI_API_KEY;
     const openaiKey = process.env.OPENAI_API_KEY;
-    if (kimiKey) {
-      openaiClient = new OpenAI({
-        apiKey: kimiKey,
-        baseURL: "https://api.moonshot.cn/v1",
-      });
+    if (groqKey) {
+      openaiClient = new OpenAI({ apiKey: groqKey, baseURL: "https://api.groq.com/openai/v1" });
+    } else if (kimiKey) {
+      openaiClient = new OpenAI({ apiKey: kimiKey, baseURL: "https://api.moonshot.ai/v1" });
     } else {
       openaiClient = new OpenAI({ apiKey: openaiKey });
     }
@@ -23,11 +22,13 @@ function getOpenAI(): OpenAI {
 }
 
 function getLLMModel(): string {
-  return process.env.KIMI_API_KEY ? "moonshot-v1-8k" : "gpt-4o-mini";
+  if (process.env.GROQ_API_KEY) return "llama-3.1-8b-instant";
+  if (process.env.KIMI_API_KEY) return "moonshot-v1-8k";
+  return "gpt-4o-mini";
 }
 
 function hasLLMKey(): boolean {
-  return !!(process.env.OPENAI_API_KEY || process.env.KIMI_API_KEY);
+  return !!(process.env.OPENAI_API_KEY || process.env.KIMI_API_KEY || process.env.GROQ_API_KEY);
 }
 
 const SYSTEM_PROMPT = `You are a brutally honest startup validation analyst.

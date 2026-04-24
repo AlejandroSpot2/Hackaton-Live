@@ -28,8 +28,20 @@
       },
       {
         "name": "OPENAI_API_KEY",
-        "description": "OpenAI API key for LLM market atlas synthesis.",
-        "required": true,
+        "description": "OpenAI API key for LLM synthesis (use one of: OPENAI_API_KEY, GROQ_API_KEY, or KIMI_API_KEY).",
+        "required": false,
+        "secret": true
+      },
+      {
+        "name": "GROQ_API_KEY",
+        "description": "Groq API key for free LLM synthesis via llama-3.1-8b-instant.",
+        "required": false,
+        "secret": true
+      },
+      {
+        "name": "KIMI_API_KEY",
+        "description": "Kimi (Moonshot AI) API key for LLM synthesis via moonshot-v1-8k.",
+        "required": false,
         "secret": true
       },
       {
